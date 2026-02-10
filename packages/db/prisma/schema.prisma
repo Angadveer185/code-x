@@ -105,6 +105,7 @@ model User {
   interviewCandidates      InterviewCandidate[]
   projects                 Projects[]
   projectTags              ProjectTags[]
+  interviewers             Interviewer[]
 
   @@index([username, email])
 }
@@ -130,7 +131,7 @@ model Organization {
   username    String       @unique
   email       String       @unique
   password    String
-  headline    String
+  tagline     String
   profileUrl  String       @default("")
   bannerUrl   String       @default("")
   createdAt   DateTime     @default(now())
@@ -150,6 +151,8 @@ model Interviewer {
   headline    String?
   profileUrl  String       @default("")
   bannerUrl   String       @default("")
+  orgId       String       @db.ObjectId
+  createdBy   User         @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   wishlists   wishlist[]

@@ -13,6 +13,8 @@ import "dotenv/config";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import cacheClient from "./utils/redis";
+import { authRouter } from "./routes";
+import type { JwtPayload } from "jsonwebtoken";
 
 dotenv.config({ path: "../.env" });
 
@@ -53,7 +55,7 @@ app.use(
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Welcome to the Backend of the Bitwise Learn application API ",
+    message: "Welcome to the Backend of the Codex Devhire API ",
     version: "1.0.0",
     timestamp: new Date(),
     environment: process.env.NODE_ENV,
@@ -73,9 +75,13 @@ app.get("/health", async (req, res) => {
     FRONTEND_URL: process.env.FRONTEND_URL,
   });
 });
+app.use("/api/v1/auth", authRouter);
+
 declare global {
   namespace Express {
-    interface Request {}
+    interface Request {
+      user?: JwtPayload;
+    }
   }
 }
 // routes

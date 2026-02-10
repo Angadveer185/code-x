@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-interface JwtPayload {}
+import type { JwtPayload } from "./type";
 /**
  * take the useremail and id and hash them to generate the accesstoken with 1 day expiry
  * again hash the useremail and id to generate a refersh token with 20 day expiry
