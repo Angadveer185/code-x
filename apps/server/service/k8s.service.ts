@@ -46,7 +46,7 @@ class K8Service {
 
     const user = {
       name: this.userName,
-      password: this.userPassword,
+      token: this.userPassword,
     };
 
     const context = {
@@ -56,9 +56,9 @@ class K8Service {
     };
     this.kc = new kubernetes.KubeConfig();
     this.kc.loadFromOptions({
-      clusters: cluster,
-      users: user,
-      contexts: context,
+      clusters: [cluster],
+      users: [user],
+      contexts: [context],
       currentContext: context.name,
     });
   }

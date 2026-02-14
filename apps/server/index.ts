@@ -14,7 +14,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cacheClient from "./utils/redis";
 import { authRouter } from "./routes";
-import type { JwtPayload } from "jsonwebtoken";
+import type { JwtPayload } from "./utils/type";
 
 dotenv.config({ path: "../.env" });
 

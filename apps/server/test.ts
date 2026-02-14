@@ -1,16 +1,17 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 import K8Service from "./service/k8s.service";
 import { podConfig, serviceConfig, ingressConfig } from "./utils/config";
 import yaml from "yaml";
 
 const serviceInstance = new K8Service({
-  localCluster: true,
+  localCluster: false,
 
   clusterName: "kind-codex",
-  clusterURL: "https://127.0.0.1:46381",
+  clusterURL: "https://127.0.0.1:42669",
 
-  userName: "jenkins",
+  userName: "dashboard-admin",
   userPassword:
-    "eyJhbGciOiJSUzI1NiIsImtpZCI6ImF4enE4Z3o0ZC1VRFItcVRyZ2s4bEloaGp6V0hFWkRiQk1UcnozUDJ1aWcifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzcwOTE2NzYyLCJpYXQiOjE3NzA5MTMxNjIsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwic2VydmljZWFjY291bnQiOnsibmFtZSI6ImplbmtpbnMiLCJ1aWQiOiJiMmQ4YjAxNy1jMDQxLTQ3ZTEtYTdjMi1iZDk1ZTJhYjQ5ZWEifX0sIm5iZiI6MTc3MDkxMzE2Miwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6amVua2lucyJ9.pdLsuqJrZmi54rolixcD4xz7XtSlVaNn_6UYBBBZx_mz9pJFsflBgHHp4N0K7Iz6IyDqox-41TxYi7A9RVXSLgUOJj_8D5t-XqPr4yBXvDSmIG3EKrpTyncaiSAx4EsUuoLj1vn126EAxnePyABg5lPZNb9HprVORnsFqPPO6zMWEovCvwTREArVTqHBWF66Nja9LZFL_6PW0LKZ45UunAZrkbDECaLzFQIDfzT4-eIwd1yR9GH4htdKfNZNSenZqerwncTMw4jiUAK09ihvuoNW5WtCX3VrgOxMLzvqFEoBXZU-nYXiyxdKt4r_ngXgB5yrNkAd2M51moLtlKwNEA",
+    "eyJhbGciOiJSUzI1NiIsImtpZCI6IlNmcVpsSktXSXJxcW84VDN2TGMxdC1maUpyamdzUnFCZzZ6cTA2UGZVVXcifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzcwOTc1NzQ5LCJpYXQiOjE3NzA5NzIxNDksImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJkYXNoYm9hcmQtYWRtaW4iLCJ1aWQiOiIzOGNjY2I1OS1iZmZkLTQ4OGEtOTg2My1mZmY1NGVlN2NlNDgifX0sIm5iZiI6MTc3MDk3MjE0OSwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmVybmV0ZXMtZGFzaGJvYXJkOmRhc2hib2FyZC1hZG1pbiJ9.A_Ru0a8eGsQ1omOo04jIZfwTe9IHeWjtUPXPcAhnk1SN0y3V7XsWxVD7Ca0A6GA2lzTEd3UyT6fqe9Z6JxwNWbHY9XAXZ2I3i5yljDPzMxwXMRTpdZfQV_8tDez1MbyF3MIv3-3cXQheW6QOcTmDWfrqlh0GSKgpF1r6eyU-TWrhnh7yVbXBS3sfu_6YxRiNuJResdjo5A3Are8xrUFeUeKDXvzfOV0uDWcw7Fo509F5OV6-zG9Nl7iDeFnAnJi4vx2w5lwaZapE6JWZbDFuXE2cxA2WoaJRr1q4baYC6X858ILtLv-kABIfpRrTenMDZQZqFN4gYUFQh95DFjth7Q",
   currentUserName: "kind-codex",
 });
 
@@ -22,7 +23,7 @@ async function main() {
 
     const podManifest = yaml.parse(podConf);
     const pod = await serviceInstance.addNewPod("default", podManifest);
-    console.log(JSON.stringify(pod));
+    console.log(pod.metadata?.name, pod.metadata?.name);
 
     let serviceConf = serviceConfig
       .replace("_podname_", "testing-pod")
@@ -33,7 +34,7 @@ async function main() {
       "default",
       serviceManifest,
     );
-    console.log(JSON.stringify(service));
+    console.log(service.metadata?.name, service.metadata?.namespace);
 
     let ingressConf = ingressConfig.replaceAll("_podname_", "testing-pod");
     const ingressManifest = yaml.parse(ingressConf);
@@ -42,7 +43,32 @@ async function main() {
       "default",
       ingressManifest,
     );
-    console.log(JSON.stringify(ingress));
+    console.log(ingress.metadata?.name, ingress.metadata?.namespace);
+
+    await Promise.resolve(() => {
+      setTimeout(() => {}, 3000);
+    });
+
+    await serviceInstance.removePod(
+      pod.metadata?.namespace!,
+      pod.metadata?.name!,
+    );
+
+    console.log("pod removed");
+
+    await serviceInstance.removeService(
+      service.metadata?.namespace!,
+      service.metadata?.name!,
+    );
+
+    console.log("service removed");
+
+    await serviceInstance.removeIngress(
+      ingress.metadata?.namespace!,
+      ingress.metadata?.name!,
+    );
+
+    console.log("ingress removed");
   } catch (err) {
     console.error("Kubernetes operation failed:", err);
   }

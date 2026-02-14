@@ -41,6 +41,13 @@ class RedisClient implements RedisClientInterface {
       console.log("Redis upload error: ", error);
     }
   }
+  async invalidateCache(key: string) {
+    try {
+      await this.client.del(key);
+    } catch (error) {
+      console.log("Redis invalidation error: ", error);
+    }
+  }
   async getCache(key: string) {
     try {
       const data = await this.client.get(key);
