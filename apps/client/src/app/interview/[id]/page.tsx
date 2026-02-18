@@ -1,7 +1,8 @@
-import React from "react";
+"use client";
+import InterviewCall from "@/components/interview/InterviewCall";
 
 function page() {
-  return <div>page</div>;
+  return <InterviewCall appId="" channelName="" token="" uid="" />;
 }
 
 export default page;
