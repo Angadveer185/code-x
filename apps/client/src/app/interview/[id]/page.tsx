@@ -1,7 +1,8 @@
-import React from "react";
+"use client";
+import Interview from "@/components/interview/Interview";
 
 function page() {
-  return <div>page</div>;
+  return <Interview />;
 }
 
 export default page;
