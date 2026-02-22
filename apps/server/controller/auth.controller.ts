@@ -49,11 +49,6 @@ class AuthController {
             const isValid = await comparePassword(password, organization.password);
             if (!isValid) throw new Error("invalid credentials");
 
-            const tokens = generateFreshTokens({
-                id: organization.id,
-                type: "ORGANIZATION",
-            });
-
             const dborganization = await prismaClient.organization.findUnique({
                 where: { id: organization.id },
                 select: {
@@ -63,10 +58,18 @@ class AuthController {
                     email: true,
                 },
             });
-
+            const token = generateFreshTokens({
+                id: organization.id,
+                type: "ORGANIZATION",
+            });
+            res.cookie("accessToken", token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+            });
             return res
                 .status(200)
-                .json(apiResponse(200, "login successful", { data: dborganization, tokens }));
+                .json(apiResponse(200, "login successful", { data: dborganization, token }));
         } catch (error: any) {
             return res.status(401).json(apiResponse(401, error.message, null));
         }
@@ -115,11 +118,6 @@ class AuthController {
             const isValid = await comparePassword(password, interviewer.password);
             if (!isValid) throw new Error("invalid credentials");
 
-            const tokens = generateFreshTokens({
-                id: interviewer.id,
-                type: "INTERVIEWER",
-            });
-
             const dbinterviewer = await prismaClient.interviewer.findUnique({
                 where: { id: interviewer.id },
                 select: {
@@ -129,10 +127,18 @@ class AuthController {
                     email: true,
                 },
             });
-
+            const token = generateFreshTokens({
+                id: interviewer.id,
+                type: "ORGANIZATION",
+            });
+            res.cookie("accessToken", token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+            });
             return res
                 .status(200)
-                .json(apiResponse(200, "login successful", { data: dbinterviewer, tokens }));
+                .json(apiResponse(200, "login successful", { data: dbinterviewer, token }));
         } catch (error: any) {
             return res.status(401).json(apiResponse(401, error.message, null));
         }
@@ -176,11 +182,6 @@ class AuthController {
             const isValid = await comparePassword(password, user.password);
             if (!isValid) throw new Error("invalid credentials");
 
-            const tokens = generateFreshTokens({
-                id: user.id,
-                type: "USER",
-            });
-
             const dbuser = await prismaClient.user.findUnique({
                 where: { id: user.id },
                 select: {
@@ -190,10 +191,18 @@ class AuthController {
                     email: true,
                 },
             });
-
+            const token = generateFreshTokens({
+                id: user.id,
+                type: "ORGANIZATION",
+            });
+            res.cookie("accessToken", token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "lax",
+            });
             return res
                 .status(200)
-                .json(apiResponse(200, "login successful", { data: user, tokens }));
+                .json(apiResponse(200, "login successful", { data: dbuser, token }));
         } catch (error: any) {
             return res.status(401).json(apiResponse(401, error.message, null));
         }

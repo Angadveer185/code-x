@@ -6,8 +6,7 @@ import type { JwtPayload } from "./type";
  */
 export function generateFreshTokens(payload: JwtPayload) {
   const accessToken = generateAccessToken(payload);
-  const refreshToken = generateRefreshToken(payload);
-  return { accessToken, refreshToken };
+  return { accessToken };
 }
 /**
  * incase when the access token gets expired, then generate a new accesstoken but before that check
@@ -26,14 +25,6 @@ export function generateAccessToken(payload: JwtPayload) {
 /**
  * incase when the refresh token gets expired, then generate a new refreshtoken
  */
-export function generateRefreshToken(payload: JwtPayload) {
-  const options = {
-    expiresIn: "20d", // Token expiration time
-  };
-  //@ts-ignore
-  const token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, options);
-  return token;
-}
 /**
  * decode the accessToken here.
  */
@@ -47,15 +38,4 @@ export function verifyAccessToken(accessToken: string) {
     throw new Error("invalid or expired access token");
   }
 }
-export function verifyRefreshToken(refreshToken: string) {
-  try {
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET as string,
-    ) as JwtPayload;
 
-    return decoded;
-  } catch (error) {
-    throw new Error("invalid or expired refresh token");
-  }
-}
