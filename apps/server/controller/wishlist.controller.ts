@@ -5,6 +5,11 @@ import apiResponse from "../utils/apiResponse";
 class WishlistController {
     async createWishlist(req: Request, res: Response) {
         try {
+            /*
+            payload
+              name
+              description  
+            */
             const data: createWishListBody = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -36,6 +41,11 @@ class WishlistController {
     }
     async updateWishlist(req: Request, res: Response) {
         try {
+            /*
+            payload
+              name?
+              description?
+            */
             const data: updateWishlistBody = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -71,6 +81,10 @@ class WishlistController {
     }
     async deleteWishlist(req: Request, res: Response) {
         try {
+            /*
+            payload
+              params: wishlistId
+            */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -95,6 +109,10 @@ class WishlistController {
     }
     async getWishlistById(req: Request, res: Response) {
         try {
+            /*
+            payload
+              params: wishlistId
+            */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -116,6 +134,10 @@ class WishlistController {
     }
     async getAllWishlistByUser(req: Request, res: Response) {
         try {
+            /*
+            payload
+              none
+            */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");

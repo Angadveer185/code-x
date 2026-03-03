@@ -3,8 +3,13 @@ import type { createWishlistEntry, updateWishlistEntry } from "../utils/type"
 import prismaClient from "../utils/prisma";
 import apiResponse from "../utils/apiResponse";
 class WishlistController {
-    async createWishlist(req: Request, res: Response) {
+    async createWishlistEntry(req: Request, res: Response) {
         try {
+            /*
+            payload
+              wishlistId
+              candidateId
+            */
             const data: createWishlistEntry = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -33,8 +38,13 @@ class WishlistController {
         }
 
     }
-    async updateWishlist(req: Request, res: Response) {
+    async updateWishlistEntry(req: Request, res: Response) {
         try {
+            /*
+            payload
+              wishlistID?
+              candidateId?
+            */
             const data: updateWishlistEntry = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -61,8 +71,12 @@ class WishlistController {
 
         }
     }
-    async deleteWishlist(req: Request, res: Response) {
+    async deleteWishlistEntry(req: Request, res: Response) {
         try {
+            /*
+            payload
+              wishlistEntryId: params
+            */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -80,8 +94,12 @@ class WishlistController {
         }
 
     }
-    async getWishlistById(req: Request, res: Response) {
+    async getWishlistEntryById(req: Request, res: Response) {
         try {
+            /*
+           payload
+             wishlistEntryId: params
+           */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
@@ -98,6 +116,10 @@ class WishlistController {
     }
     async getAllEntriesByWishlist(req: Request, res: Response) {
         try {
+            /*
+           payload
+             wishlistId
+           */
             const data = req.body;
             if (!data) throw new Error("Please Provide all required fields");
             if (!req.user) throw new Error("user is Not Authorized");
