@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useColors } from "@/components/General/(Color Manager)/useColors";
 import toast from "react-hot-toast";
+import axiosInstance from "@/utils/axiosInstance";
 
 type EmailStepData = {
   email: string;
@@ -28,7 +29,7 @@ export default function ForgotPasswordV1() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,17 +58,42 @@ export default function ForgotPasswordV1() {
 
   const password = watch("password");
 
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    const message = (error as any)?.response?.data?.message;
+    return typeof message === "string" && message.length > 0
+      ? message
+      : fallback;
+  };
+
+  const sendForgotPasswordOtp = async (emailAddress: string) => {
+    const res = await axiosInstance.post(
+      "/api/v1/auth/forgot-password",
+      { email: emailAddress },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (res?.data?.statusCode !== 200) {
+      throw new Error(res?.data?.message || "Failed to send OTP.");
+    }
+
+    return res.data;
+  };
+
   const onEmailSubmit = async (data: EmailStepData) => {
     try {
       setLoading(true);
-      // TODO: Call backend API to send OTP
-      
       setEmail(data.email);
+
+      await sendForgotPasswordOtp(data.email);
       toast.success("OTP sent to your email!");
       setCurrentStep("otp");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to send OTP. Please try again.");
+      toast.error(getApiErrorMessage(err, "Failed to send OTP. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -76,14 +102,30 @@ export default function ForgotPasswordV1() {
   const onOTPSubmit = async (data: OTPStepData) => {
     try {
       setLoading(true);
-      // TODO: Call backend API to verify OTP
-      
-      setOtp(data.otp);
+
+      const res = await axiosInstance.post(
+        "/api/v1/auth/verify-otp",
+        {
+          email,
+          otp: data.otp,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (res?.data?.statusCode !== 200 || !res?.data?.data) {
+        throw new Error(res?.data?.message || "OTP verification failed.");
+      }
+
+      setResetToken(res.data.data);
       toast.success("OTP verified!");
       setCurrentStep("password");
     } catch (err) {
       console.error(err);
-      toast.error("Invalid OTP. Please try again.");
+      toast.error(getApiErrorMessage(err, "Invalid OTP. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -92,13 +134,48 @@ export default function ForgotPasswordV1() {
   const onPasswordSubmit = async (data: PasswordStepData) => {
     try {
       setLoading(true);
-      // TODO: Call backend API to reset password
-      
+
+      if (!resetToken) {
+        throw new Error("Reset token missing. Please verify OTP again.");
+      }
+
+      const res = await axiosInstance.post(
+        "/api/v1/auth/reset-password",
+        {
+          resetToken,
+          newPassword: data.password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (res?.data?.statusCode !== 200) {
+        throw new Error(res?.data?.message || "Failed to reset password.");
+      }
+
       toast.success("Password reset successfully!");
       setCurrentStep("success");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to reset password. Please try again.");
+      toast.error(
+        getApiErrorMessage(err, "Failed to reset password. Please try again."),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setLoading(true);
+      await sendForgotPasswordOtp(email);
+      toast.success("OTP resent to your email!");
+    } catch (err) {
+      console.error(err);
+      toast.error(getApiErrorMessage(err, "Unable to resend OTP."));
     } finally {
       setLoading(false);
     }
@@ -134,10 +211,9 @@ export default function ForgotPasswordV1() {
                 <div
                   className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                    ${
-                      currentStep === step
-                        ? `${Colors.background.special} ${Colors.text.inverted}`
-                        : currentStep > step || step === "otp"
+                    ${currentStep === step
+                      ? `${Colors.background.special} ${Colors.text.inverted}`
+                      : currentStep > step || step === "otp"
                         ? `${Colors.background.special} ${Colors.text.inverted}`
                         : `${Colors.background.secondary} ${Colors.text.secondary}`
                     }
@@ -149,11 +225,10 @@ export default function ForgotPasswordV1() {
                 </div>
                 {idx < 2 && (
                   <div
-                    className={`w-30 h-0.5 mx-2 ${
-                      currentStep > step || step === "otp"
-                        ? `${Colors.background.special}`
-                        : Colors.background.secondary
-                    }`}
+                    className={`w-30 h-0.5 mx-2 ${currentStep > step || step === "otp"
+                      ? `${Colors.background.special}`
+                      : Colors.background.secondary
+                      }`}
                   ></div>
                 )}
               </div>
@@ -293,6 +368,8 @@ export default function ForgotPasswordV1() {
                   Didn't receive the code?{" "}
                   <button
                     type="button"
+                    onClick={handleResendOtp}
+                    disabled={loading}
                     className={`${Colors.text.special} hover:underline font-semibold cursor-pointer`}
                   >
                     Resend OTP
