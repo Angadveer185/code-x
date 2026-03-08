@@ -47,6 +47,11 @@ export interface UpdateUser {
   userInfo?: string;
   headline?: string;
 }
+export interface UpdateInterviewer {
+  name?: string;
+  userInfo?: string;
+  headline?: string;
+}
 
 export interface createExperience {
   companyName: string;

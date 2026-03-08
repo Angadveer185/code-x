@@ -262,12 +262,17 @@ class AuthController {
   async matchVerificationOTP(req: Request, res: Response) {
     try {
       /**
-       * req.params = email
+       * req.body = email,otp
        */
       const { email, otp } = req.body;
       const isCorrect = handleVerifyOTP(email, otp);
       const resetToken = generateResetToken(email);
       if (!isCorrect) throw new Error("otp is not verified");
+      res.cookie("resetToken", resetToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+      });
       res
         .status(200)
         .json(apiResponse(200, "OTP verified sucessfully", resetToken));
@@ -352,18 +357,18 @@ class AuthController {
     }
   }
 
-  async Logout(req:Request,res:Response){
+  async Logout(req: Request, res: Response) {
     try {
-      res.clearCookie("accessToken",{
-        httpOnly:true,
-        secure:false,
-        sameSite:"lax"
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax"
       });
 
-      return res.json({success:true});
-    } catch (error:any) {
+      return res.json({ success: true });
+    } catch (error: any) {
       return res.status(200).json(
-        apiResponse(500,error.message,null)
+        apiResponse(500, error.message, null)
       );
     }
   }
