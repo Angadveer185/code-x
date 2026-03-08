@@ -251,6 +251,7 @@ class AuthController {
        * req.params = email
        */
       const { email } = req.body;
+      if (!email) throw new Error("email is required");
       const sentOtp = await handleSendOTPMail(email, "email-otp-verification");
       if (sentOtp === false) throw new Error("OTP could not be sent");
       res.status(200).json(apiResponse(200, "OTP sent successfully", null));
@@ -265,6 +266,8 @@ class AuthController {
        * req.body = email,otp
        */
       const { email, otp } = req.body;
+      console.log(email, otp);
+      if (!email || !otp) throw new Error("email and otp are required");
       const isCorrect = handleVerifyOTP(email, otp);
       const resetToken = generateResetToken(email);
       if (!isCorrect) throw new Error("otp is not verified");
