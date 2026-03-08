@@ -332,9 +332,9 @@ function Info({ icon, text }: { icon: JSX.Element; text?: string }) {
   if (!text) return null;
 
   return (
-    <div className="flex items-center gap-4 text-sm">
+    <div className="flex items-center gap-4 text-sm min-w-0">
       <span className={Colors.text.special}>{icon}</span>
-      <span className={Colors.text.primary}>{text}</span>
+      <span className={`${Colors.text.primary} break-all leading-snug`}>{text}</span>
     </div>
   );
 }

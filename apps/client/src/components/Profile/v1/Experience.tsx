@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import {
   Briefcase,
   Building2,
@@ -50,6 +50,8 @@ export default function Experience() {
   const [offerLetterFile, setOfferLetterFile] = useState<File | null>(null);
   const [completionCertificateFile, setCompletionCertificateFile] =
     useState<File | null>(null);
+  const [hoveredStartDate, setHoveredStartDate] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const [form, setForm] = useState({
     companyName: "",
@@ -210,6 +212,13 @@ export default function Experience() {
     setCompletionCertificateFile(null);
   };
 
+  const handleDotHoverMove = (event: MouseEvent<HTMLButtonElement>) => {
+    setTooltipPosition({
+      x: event.clientX + 12,
+      y: event.clientY - 14,
+    });
+  };
+
   const handleUpdateExperience = async () => {
     if (!editingExperience) return;
 
@@ -284,82 +293,115 @@ export default function Experience() {
 
       {/* Experience List */}
       {data?.userExperiences && data.userExperiences.length > 0 ? (
-        <div className="space-y-3 max-h-112 overflow-y-auto pr-1">
-          {data.userExperiences.map((exp) => (
-            <div
-              key={exp.id}
-              onClick={() => setSelectedExperience(exp)}
-              className={`${Colors.background.secondary} rounded-lg p-4 ${Colors.border.defaultThin} cursor-pointer ${Colors.properties.interactiveButton}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p
-                    className={`${Colors.text.primary} font-mono text-base font-semibold`}
-                  >
-                    {exp.jobTitle}
-                  </p>
-                  <p
-                    className={`${Colors.text.secondary} text-sm font-mono mt-1`}
-                  >
-                    {exp.companyName}
-                  </p>
+        <div className="max-h-112 overflow-y-auto overflow-x-hidden pr-1">
+          <div className="space-y-4">
+            {data.userExperiences.map((exp, index) => (
+              <div key={exp.id} className="relative flex gap-3">
+                <div className="relative flex w-7 shrink-0 justify-center">
+                  {index < data.userExperiences.length - 1 && (
+                    <span
+                      className={`absolute top-6 -bottom-4.5 w-px ${Colors.border.defaultThinLeft}`}
+                    />
+                  )}
+                  <div className="relative mt-1 group/dot">
+                    <button
+                      type="button"
+                      aria-label={`Started ${formatMonthYear(exp.startDate)}`}
+                      className={`h-3 w-3 rounded-full ${Colors.background.special} ${Colors.properties.interactiveButton}`}
+                      onMouseEnter={(e) => {
+                        setHoveredStartDate(formatMonthYear(exp.startDate));
+                        handleDotHoverMove(e);
+                      }}
+                      onMouseMove={handleDotHoverMove}
+                      onMouseLeave={() => setHoveredStartDate(null)}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditPlaceholder(exp.id);
-                    }}
-                    className={`${Colors.properties.interactiveButton} ${Colors.text.primary} text-xs font-mono px-3 py-1.5 rounded-md ${Colors.border.defaultThin}`}
+                <div
+                  onClick={() => setSelectedExperience(exp)}
+                  className={`${Colors.background.secondary} rounded-lg p-4 ${Colors.border.defaultThin} cursor-pointer ${Colors.properties.interactiveButton} flex-1`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className={`${Colors.text.primary} font-mono text-base font-semibold`}
+                      >
+                        {exp.jobTitle}
+                      </p>
+                      <p
+                        className={`${Colors.text.secondary} text-sm font-mono mt-1`}
+                      >
+                        {exp.companyName}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPlaceholder(exp.id);
+                        }}
+                        className={`${Colors.properties.interactiveButton} ${Colors.text.primary} text-xs font-mono px-3 py-1.5 rounded-md ${Colors.border.defaultThin}`}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(exp.id);
+                        }}
+                        className={`${Colors.properties.interactiveButton} text-red-500 text-xs font-mono px-3 py-1.5 rounded-md ${Colors.border.defaultThin}`}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`${Colors.background.primary} ${Colors.text.secondary} text-xs font-mono px-2 py-1 rounded-md ${Colors.border.defaultThin}`}
+                    >
+                      {exp.jobType}
+                    </span>
+                    <span
+                      className={`${Colors.background.primary} ${Colors.text.secondary} text-xs font-mono px-2 py-1 rounded-md ${Colors.border.defaultThin}`}
+                    >
+                      {exp.isOngoing === "ONGOING" ? "Ongoing" : "Completed"}
+                    </span>
+                  </div>
+
+                  <p className={`${Colors.text.secondary} text-sm font-mono mt-3`}>
+                    {formatMonthYear(exp.startDate)} -{" "}
+                    {exp.isOngoing === "ONGOING"
+                      ? "Present"
+                      : formatMonthYear(exp.endDate)}
+                  </p>
+
+                  <p
+                    className={`${Colors.text.secondary} text-sm font-mono mt-3 whitespace-normal wrap-break-word`}
+                    title={exp.jobDescription}
                   >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteId(exp.id);
-                    }}
-                    className={`${Colors.properties.interactiveButton} text-red-500 text-xs font-mono px-3 py-1.5 rounded-md ${Colors.border.defaultThin}`}
-                  >
-                    Delete
-                  </button>
+                    {getDescriptionPreview(exp.jobDescription)}
+                  </p>
                 </div>
               </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span
-                  className={`${Colors.background.primary} ${Colors.text.secondary} text-xs font-mono px-2 py-1 rounded-md ${Colors.border.defaultThin}`}
-                >
-                  {exp.jobType}
-                </span>
-                <span
-                  className={`${Colors.background.primary} ${Colors.text.secondary} text-xs font-mono px-2 py-1 rounded-md ${Colors.border.defaultThin}`}
-                >
-                  {exp.isOngoing === "ONGOING" ? "Ongoing" : "Completed"}
-                </span>
-              </div>
-
-              <p className={`${Colors.text.secondary} text-sm font-mono mt-3`}>
-                {formatMonthYear(exp.startDate)} -{" "}
-                {exp.isOngoing === "ONGOING"
-                  ? "Present"
-                  : formatMonthYear(exp.endDate)}
-              </p>
-
-              <p
-                className={`${Colors.text.secondary} text-sm font-mono mt-3 truncate`}
-                title={exp.jobDescription}
-              >
-                {getDescriptionPreview(exp.jobDescription)}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <p className={`${Colors.text.secondary} text-sm font-mono`}>
           No experience added yet.
         </p>
+      )}
+
+      {hoveredStartDate && (
+        <div
+          className={`pointer-events-none fixed z-60 rounded-md px-2 py-1 text-xs font-mono shadow-md ${Colors.background.primary} ${Colors.text.primary} ${Colors.border.defaultThin}`}
+          style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
+        >
+          Started: {hoveredStartDate}
+        </div>
       )}
 
       {/* Modal */}
